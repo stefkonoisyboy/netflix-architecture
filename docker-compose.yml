@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  recommendation-svc:
+    build:
+      context: .
+      dockerfile: Dockerfile.recommendation
+    container_name: netflix-recommendation-svc
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - netflix-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('net').connect(3001, 'localhost')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    container_name: netflix-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - REC_SERVICE_HOST=recommendation-svc
+    depends_on:
+      - recommendation-svc
+    networks:
+      - netflix-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/control/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  netflix-network:
+    driver: bridge

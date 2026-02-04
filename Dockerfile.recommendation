@@ -1,0 +1,26 @@
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+COPY tsconfig*.json ./
+COPY nest-cli.json ./
+
+RUN npm ci --include=dev
+
+COPY apps/recommendation-svc ./apps/recommendation-svc
+
+RUN npm run build recommendation-svc
+
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY --from=builder /app/dist/apps/recommendation-svc ./dist/apps/recommendation-svc
+
+EXPOSE 3001
+
+CMD ["node", "dist/apps/recommendation-svc/main.js"]
