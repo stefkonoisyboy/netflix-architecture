@@ -102,8 +102,29 @@ export class RecommendationService implements OnModuleInit {
       );
     });
 
-    this.breaker.on('fallback', (result) => {
+    this.breaker.on('timeout', () => {
+      this.eventService.emitCircuitBreakerEvent(
+        this.breaker.opened ? 'OPEN' : this.breaker.halfOpen ? 'HALF_OPEN' : 'CLOSED',
+        this.breaker.stats.failures,
+        this.breaker.stats.fires,
+      );
+    });
+
+    this.breaker.on('reject', () => {
+      this.eventService.emitCircuitBreakerEvent(
+        this.breaker.opened ? 'OPEN' : this.breaker.halfOpen ? 'HALF_OPEN' : 'CLOSED',
+        this.breaker.stats.failures,
+        this.breaker.stats.fires,
+      );
+    });
+
+    this.breaker.on('fallback', () => {
       console.log('⚠️  Fallback triggered');
+      this.eventService.emitCircuitBreakerEvent(
+        this.breaker.opened ? 'OPEN' : this.breaker.halfOpen ? 'HALF_OPEN' : 'CLOSED',
+        this.breaker.stats.failures,
+        this.breaker.stats.fires,
+      );
     });
   }
 
