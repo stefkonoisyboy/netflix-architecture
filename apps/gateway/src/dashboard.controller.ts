@@ -1,6 +1,6 @@
 import { Controller, Sse, MessageEvent } from '@nestjs/common';
-import { Observable, interval } from 'rxjs';
-import { map, merge } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { EventService } from './event.service';
 
 @Controller('dashboard')
